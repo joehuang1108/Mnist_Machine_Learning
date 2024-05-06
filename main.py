@@ -16,11 +16,20 @@
 
 from tkinter import *
 import tkinter as tk
+import tensorflow as tf
+from tkinter import Canvas, Button, font
+from tkinter import messagebox
 from keras.models import load_model
-from PIL import Image, ImageDraw
+from PIL import Image, ImageDraw, ImageGrab
 import numpy as np
+import win32gui
+import io
+import imageio
 
-model = load_model('Test_model.h5')
+model = load_model('turbo_model_1.h5')
+#
+def clear():
+    canvas.delete("all")
 
 def paint(event):
     # coordinates of cursor and draw from point
@@ -42,7 +51,11 @@ def process_and_predict():
     digit_array = digit_array.reshape(1,28,28,1)
     prediction = model.predict(digit_array)
     prediction_digit = np.argmax(prediction)
-    print(prediction_digit)
+    print("Predicted digit: " + str(prediction_digit))
+
+    for i, prob, in enumerate(prediction.squeeze()):
+        print("Class: " + str(i) + " Probability: " + str(prob))
+
 
 root = tk.Tk()
 root.title("Handwritten Digits")
@@ -54,7 +67,9 @@ canvas.bind("<B1-Motion>", paint)
 recognize_button = tk.Button(root, text = "Recognize", command=handwriting_digits)
 recognize_button.pack(side=tk.RIGHT)
 
+clear_button = tk.Button(root, text = "Clear", command=clear)
+clear_button.pack(side=tk.LEFT)
+
+
 
 mainloop()
-#
-#

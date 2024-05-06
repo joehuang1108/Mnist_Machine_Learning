@@ -8,6 +8,7 @@ from keras.datasets import mnist
 from keras.utils import to_categorical
 from keras.models import Sequential
 from keras.layers import Dense, Dropout, Flatten, Conv2D, MaxPool2D
+from keras.callbacks import EarlyStopping
 from matplotlib import pyplot
 
 # Loading the training and testing set into separate variables
@@ -54,7 +55,8 @@ model.add(Conv2D(32, kernel_size=(3,3),
                  activation='relu',
                  input_shape=(img_rows, img_cols, 1)))
 model.add(Conv2D(64, (3,3), activation='relu'))
-# model.add(MaxPool2D(pool_size=(2,2)))
+model.add(Conv2D(64, (3,3), activation='relu'))
+model.add(MaxPool2D(pool_size=(2,2)))
 model.add(Dropout(0.25))
 model.add(Flatten())
 model.add(Dense(128, activation='relu'))
@@ -67,17 +69,20 @@ model.compile(loss='categorical_crossentropy',
               optimizer='adam',
               metrics=['accuracy'])
 
+early_stopping = EarlyStopping(monitor='val_loss', patience=3, verbose=0)
 # Number of training samples used in one iteration
 # 60,000 / 128 = 470
+# 60,000 / 32 = 1875
 # Takes 470 iterations to go through training dataset
-batch_size = 128
+batch_size = 32
 # Epoch: Number of cycles going through the training dataset
-epochs = 10
+epochs = 25
 model.fit(train_x, train_y,
           batch_size= batch_size,
           epochs= epochs,
           verbose=1,
-          validation_data=(test_x,test_y))
+          validation_data=(test_x,test_y),
+          callbacks=[early_stopping])
 score = model.evaluate(test_x, test_y, verbose=0)
 print('Test loss:', score[0])   # Want as low as possible
 print('Test Accuracy:', score[1])   # Want as high as possible
